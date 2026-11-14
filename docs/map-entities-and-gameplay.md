@@ -17,11 +17,23 @@ table.
 
 One useful check against the shipped data: every SCENE01 leg begins with an
 entity in slot 0 whose flags are `0x2001` (model `0x01`). That slot's position
-is present per leg, and its heading is stored there. `car_leg_reset()` reads
-object 0's heading, and resets the car using sprite coordinates already
-present in runtime state. This makes slot 0 the strongly supported player-start
-record; the precise loader step that copies its coordinates into those sprite
-fields remains to be traced.
+and heading are present per leg. The map also has sprite-0 X/Z/Y words at
+`+0x0761`, `+0x09E1`, and `+0x0C61`; in the shipped maps, X/Z match the position
+of entity slot 0. Because the map is loaded directly into the game data
+segment, these words are `DS_sprite_x/z/y`. `car_leg_reset()` initializes the
+player's position from those sprite coordinates, while reading the heading
+from object 0. Thus the main entity record and the separate sprite-0 start
+coordinates both need updating when moving the player start.
+
+For the experimental reversed Pacific course, racer headings and formation
+offsets are adjusted by the difference between the start- and finish-road
+rotations. That points racers along the new leg while keeping their relative
+spacing. The stored heading word is rotated per byte, matching its paired
+heading components. Leg 3 starts on an intersection; its rotation alone does
+not identify the direction of travel, so the current transform leaves that
+leg's racer heading and formation unchanged pending route verification. Racer
+entity Y values and the separate player sprite Y value are also adjusted for
+the elevation change at the new start.
 
 The map header bytes `+0x18..+0x1C` should therefore not be treated as a
 confirmed start-position field.
@@ -77,6 +89,15 @@ branch/control waypoints, not at every tile. Modes `2`, `3`, and `4` select
 different branch strategies; a `0` ends that opponent's run. These scripts
 select among paths, while the lane bank supplies the actual waypoint
 coordinates and cell-to-cell connections.
+
+The shared `SCENETTP.BIN` lane index embedded in `DATAB.DAT` contains 123
+entries (`0x00`–`0x7A`); IDs `0x7B`–`0x7F` are not indexed in that shared bank.
+The generated [lane-connectivity report](course-lane-connectivity.md) catalogs
+the indexed tile ports and audits their rotated, elevation-aware links across
+the original maps. All five inverted Pacific opponents have a valid first
+neighbor entry with zero height delta in this shared bank, so the reported
+U-turns are not explained by a missing first edge. Later waypoints, branch
+choices, headings, or a scene-specific lane bank remain to be checked.
 
 The five Pacific maps confirm the behavior you noticed:
 
