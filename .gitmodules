@@ -1,0 +1,6 @@
+[submodule "repos/testdrive3-enhanced-analysis"]
+	path = repos/testdrive3-enhanced-analysis
+	url = https://github.com/Miragecoder/testdrive3-enhanced-analysis.git
+[submodule "repos/testdrive3-course-editor"]
+	path = repos/testdrive3-course-editor
+	url = https://github.com/Miragecoder/testdrive3-course-editor.git
