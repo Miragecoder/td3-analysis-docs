@@ -112,10 +112,26 @@ scripts. The shared-bank audit finds that all five inverted Pacific opponent
 starts have a matching first exit with zero height delta; the first-edge
 same-cell U-turn fallback therefore does not explain the reported U-turns
 under this bank. This does not rule out a later unmatched edge, route-script
-branch, heading behavior, or a difference in a scene-specific `P.BIN`. The
-editor currently does not load the course `P.BIN` banks needed to draw or
-validate those full paths. See `course-lane-connectivity.md` for the tile port
-catalog and per-leg map audit.
+branch, heading behavior, or a difference in the tested map data. The editor
+now traces opponent routes from their stored start waypoints to the finish
+tile, detected from its surface material. It follows the scene LST's bank
+selection and loads `<scene>P.BIN` when available. Both opponents reach the
+finish on all five original Pacific legs. The supplied `SCENE03.LST` selects
+the shared bank, so this inverted experiment does not require
+`SCENE03P.BIN`. The inverted trace predicts a same-cell U-turn on leg 1; the
+remaining legs have no same-cell fallback, but the rendered route paths turn
+back on legs 2, 4, and 5 before continuing in the correct direction. The user
+confirmed that leg 3 has no such reversal in the route rendering and that the
+opponents in-game immediately head the right way there. This resolves the
+apparent mismatch between the fallback counter and the observed route turns:
+the counter covers only a dead-end fallback, not every geometric reversal in
+the route. Some existing scripts still end before the detected finish:
+both scripts end on inverted legs 3 and 5, and one ends early on legs 2 and 4.
+In particular, the revised leg-3 ground-road finish at `(0,2)` has a
+height-matched connection from the preserved intersection, but both opponent
+scripts terminate before reaching it. That is a route-script issue, not
+evidence of an elevation mismatch at the finish. See
+`course-lane-connectivity.md` for the tile port catalog and per-leg map audit.
 
 ## Safe implementation sequence
 

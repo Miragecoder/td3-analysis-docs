@@ -83,6 +83,12 @@ own object/lane banks (`<scene>O.BIN` / `<scene>P.BIN`); otherwise it uses
 shared sets. Thus “the course has its own traffic cars” is broadly right for
 Cape Cod's scene bank, but Pacific Coast's object bank is shared.
 
+The final byte in the LST's 10-byte leg-data field controls that choice:
+`SCENE01.LST` and the experimental `SCENE03.LST` use the shared banks, while
+`SCENE02.LST` requests course-specific banks including `SCENE02P.BIN`. That
+bank is archived inside `SCENE02.DAT` at offset `0x1D11A`; it is not a
+standalone file in the supplied workspace.
+
 Trees and other roadside items can be billboard sprites rather than 3D
 meshes. The asset inventory counts the sprite banks per course; the game also
 selects sprite/resource data during each leg load via the LST resource

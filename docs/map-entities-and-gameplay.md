@@ -76,10 +76,15 @@ tile's orientation. In short, the tile identifies the route template, while
 the lane bank provides the path geometry and connectivity.
 
 `flow_race.c` loads a course-specific `<scene>P.BIN` when configured, or the
-shared `SCENETTP.BIN` lane bank otherwise. Lane waypoint flags also carry
-control information used by traffic behavior, such as branches and stopping
-controls. Map entity records supply the individual vehicles' model, behavior,
-position, and current lane/waypoint state.
+shared `SCENETTP.BIN` lane bank otherwise. The final byte of the scene LST's
+10-byte leg-data field selects this: `0` loads the scene's own object/lane
+banks, while nonzero keeps the shared banks. In the supplied files
+`SCENE01.LST` and experimental `SCENE03.LST` select the shared bank;
+`SCENE02.LST` selects `SCENE02P.BIN`, an archived resource at offset `0x1D11A`
+inside `SCENE02.DAT`. No loose P.BIN is required. Lane waypoint flags also
+carry control information used by traffic behavior, such as branches and
+stopping controls. Map entity records supply the individual vehicles' model,
+behavior, position, and current lane/waypoint state.
 
 The two computer opponents have additional branch scripts in the map header.
 The port labels their storage `DS_opp_scripts` at map offset `+0x05`: two
@@ -89,6 +94,32 @@ branch/control waypoints, not at every tile. Modes `2`, `3`, and `4` select
 different branch strategies; a `0` ends that opponent's run. These scripts
 select among paths, while the lane bank supplies the actual waypoint
 coordinates and cell-to-cell connections.
+
+The editor traces opponent waypoint sequences on both course layouts. It
+detects each map's finish tile by its surface material, reads the scene LST's
+lane-bank flag, extracts an archived `<scene>P.BIN` from its scene DAT when
+required, and uses the shared bank otherwise. It follows branch scripts,
+rotated cell connections, and the engine's same-cell U-turn fallback; it does
+not simulate steering or vehicle timing.
+
+Against the shared bank, both opponents reach the finish without a fallback
+U-turn on all five original Pacific legs. On the inverted map, the trace
+predicts a same-cell U-turn for both racers on leg 1; on legs 2–5 it finds no
+such U-turn, but the route scripts end before those opponents reach the finish
+(leg 2: one opponent; leg 3: both; leg 4: one; leg 5: both). The supplied
+`SCENE03.LST` selects the shared bank, so a private `SCENE03P.BIN` is not
+expected for this inversion. The user confirmed the workspace's
+`TD3_SCENE03/SCENE03.DAT` is the latest playtested file, so an asset-version
+mismatch is not the explanation for the route behavior. Reviewing the rendered
+paths, the user confirmed that the opponents turn back before the apparent
+dead ends and then head in the correct direction on inverted legs 1, 2, 4, and
+5. Leg 3's rendered route does not turn back; the user drove to leg 3 and
+confirmed that its opponents immediately head in the correct direction. This
+resolves the reported all-legs U-turn discrepancy. The trace's U-turn count is
+narrower: it records only the engine's same-cell fallback when an exit has no
+matching neighbor entry. A visual reversal along connected waypoints need not
+use that fallback. The route trace still does not simulate steering or vehicle
+timing.
 
 The shared `SCENETTP.BIN` lane index embedded in `DATAB.DAT` contains 123
 entries (`0x00`–`0x7A`); IDs `0x7B`–`0x7F` are not indexed in that shared bank.
@@ -111,16 +142,33 @@ The five Pacific maps confirm the behavior you noticed:
 
 These are behavior/branch codes, not route names or a complete drawn path.
 The scene LST's named route choices belong to the player's route-selection
-system and should not be confused with these two opponent scripts. The current
-browser viewer does not load `P.BIN`, so it can inspect the scripts but cannot
-yet draw the opponents' full road paths.
+system and should not be confused with these two opponent scripts. The editor
+extracts scene-specific `P.BIN` lane banks from the scene DAT archive when
+available, but does not automatically generate or rewrite route scripts.
+Cape Cod's `SCENE02P.BIN` is embedded in `SCENE02.DAT` and is resolved through
+the LST archive directory. Its 127-entry index is now used for the Cape route
+traces, and traces for the first three legs still terminate at script end before
+reaching the detected finish:
+
+| Cape leg | Opponent 1 trace endpoint | Opponent 2 trace endpoint |
+|---|---|---|
+| 1 | script ended after 214 steps at (3,1), tile `0x68` | script ended after 174 steps at (19,1), tile `0x44` |
+| 2 | script ended after 214 steps at (2,1), tile `0x15` | script ended after 199 steps at (2,1), tile `0x15` |
+| 3 | script ended after 229 steps at (1,1), tile `0x15` | script ended after 208 steps at (1,1), tile `0x15` |
+
+These are trace results, not a confirmed report of the in-game routes. They
+leave the mismatch with the expected finish-reaching routes on Cape Cod
+unresolved.
 
 The high byte of an entity's flags word includes a behavior value. In
 `sim_traffic.c`, behaviors below 2 and behavior 9 use shuttle motion: the
 entity reverses at a waypoint endpoint. Other values select different traffic
-behaviors, including branch choices and a slower train behavior. Thus the
-back-and-forth motion is AI behavior attached to an entity following its lane,
-not an animation inferred from its tile alone.
+behaviors, including branch choices and a slower train behavior. Train models
+`0x12`–`0x14` use the same lane-following routine; behavior 8 halves their
+speed. Thus trains and cars share the waypoint-based movement mechanism,
+although a particular railroad tile's route still depends on the selected lane
+bank and placed train entity. Back-and-forth motion is AI behavior attached to
+an entity following its lane, not an animation inferred from its tile alone.
 
 ## Trees and tile-attached sprites
 

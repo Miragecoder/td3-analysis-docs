@@ -1,8 +1,9 @@
 # Test Drive III lane connectivity
 
-Generated from `SCENETTP.BIN` embedded in `DATAB.DAT` and the supplied Pacific/Cape Cod map files.
-The game can load a scene-specific `<scene>P.BIN` instead; none was supplied in this workspace, so this
-report describes the shared bank and marks that limitation where relevant.
+The connectivity tables below are generated from the shared `SCENETTP.BIN`
+embedded in `DATAB.DAT` and the supplied Pacific/Cape Cod map files. Cape Cod
+selects a private bank, `SCENE02P.BIN`, embedded in `SCENE02.DAT`; it is used
+for route traces but is not substituted into these shared-bank tables.
 
 ## Lane-bank format and connection rule
 
@@ -205,9 +206,8 @@ exit and checks the neighboring entry using the engine’s edge key; it does not
 | Inverted 5 | 0x31 / 1 | 0x0043 / 0x0043 (index 3) | 3@E h2 | 0x15 at (2,13), entry 0xc0 | match; height delta 0 |
 
 These initial exits are only a first-step check. A successful entry match rules out the game’s
-same-cell dead-end fallback at that first edge, but not a later route/script branch, a visually
-misleading turn, or a difference in a scene-specific `P.BIN`. The workspace contains the shared
-`SCENETTP.BIN` bank but not the scene-specific lane banks loaded by `stage_load_objects()` when present.
+same-cell dead-end fallback at that first edge, but not a later route/script branch or a visually
+misleading turn. The Cape Cod route trace uses the private bank archived in `SCENE02.DAT`.
 
 ## Leg 3 endpoint example
 
