@@ -109,13 +109,18 @@ such U-turn, but the route scripts end before those opponents reach the finish
 (leg 2: one opponent; leg 3: both; leg 4: one; leg 5: both). The supplied
 `SCENE03.LST` selects the shared bank, so a private `SCENE03P.BIN` is not
 expected for this inversion. The user confirmed the workspace's
-`TD3_SCENE03/SCENE03.DAT` is the latest playtested file, so an asset-version
-mismatch is not the explanation for the route behavior. Reviewing the rendered
-paths, the user confirmed that the opponents turn back before the apparent
+`TD3_SCENE03/SCENE03.DAT` is the latest playtested file. Comparing it with a
+fresh output of the current inversion code reveals that its leg-3 start and
+finish layout comes from an earlier transform; see
+`course-inversion-feasibility.md`. Reviewing the rendered paths, the user
+confirmed that the opponents turn back before the apparent
 dead ends and then head in the correct direction on inverted legs 1, 2, 4, and
 5. Leg 3's rendered route does not turn back; the user drove to leg 3 and
 confirmed that its opponents immediately head in the correct direction. This
-resolves the reported all-legs U-turn discrepancy. The trace's U-turn count is
+resolves the reported all-legs U-turn discrepancy. The available playtested
+`SCENE03.DAT` differs from the current inverter's output in its leg-3 start
+and finish layout, so the current export still needs its own in-game check
+(details in `course-inversion-feasibility.md`). The trace's U-turn count is
 narrower: it records only the engine's same-cell fallback when an exit has no
 matching neighbor entry. A visual reversal along connected waypoints need not
 use that fallback. The route trace still does not simulate steering or vehicle

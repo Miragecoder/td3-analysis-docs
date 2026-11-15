@@ -85,14 +85,13 @@ player, scaled to the entity-Y units. The generated stage-1 racers now have
 their Y values raised by 8192 for the four-level change. This is a data-level
 check, not an in-game confirmation.
 
-The latest playtest also reports immediate AI U-turns on all inverted stages.
-The heading and formation adjustment cannot by itself reverse waypoint order
-or repair lane exits; the route remains unresolved. For stage 3, the finish is
-now placed on the ground-road exit beyond the preserved intersection, rather
-than on the overpass. The exact finish side and drive-through behavior still
-need an in-game check. The stage-5 horizon remap pair is generated as `0x6868`,
-but its visual correction also needs an in-game check. None of these
-data-level checks establishes complete visual correctness or playability.
+The user later confirmed from the rendered routes and an in-game leg-3 test
+that the opponents turn back before apparent dead ends on stages 1, 2, 4, and
+5, but head the correct way immediately on stage 3. This narrows the behavior:
+leg 3 is the exception, not evidence that every inverted start is broken. The
+stage-5 horizon remap pair is generated as `0x6868`, but its visual correction
+still needs an in-game check. None of these data-level checks establishes
+complete visual correctness or playability.
 
 ## Why AI is the main risk
 
@@ -122,16 +121,36 @@ the shared bank, so this inverted experiment does not require
 remaining legs have no same-cell fallback, but the rendered route paths turn
 back on legs 2, 4, and 5 before continuing in the correct direction. The user
 confirmed that leg 3 has no such reversal in the route rendering and that the
-opponents in-game immediately head the right way there. This resolves the
-apparent mismatch between the fallback counter and the observed route turns:
-the counter covers only a dead-end fallback, not every geometric reversal in
-the route. Some existing scripts still end before the detected finish:
-both scripts end on inverted legs 3 and 5, and one ends early on legs 2 and 4.
-In particular, the revised leg-3 ground-road finish at `(0,2)` has a
-height-matched connection from the preserved intersection, but both opponent
-scripts terminate before reaching it. That is a route-script issue, not
-evidence of an elevation mismatch at the finish. See
-`course-lane-connectivity.md` for the tile port catalog and per-leg map audit.
+opponents in-game immediately head the right way there. The fallback counter
+is narrower than the visual behavior: it records only a same-cell dead-end
+fallback, not every geometric reversal in a connected waypoint route.
+
+Leg 3 has a distinct setup in `invertPacificCourse()`: its source starts on
+intersection tile `0x7A`, whereas the other four source legs start on straight
+tiles `0x31` or `0x33`. The transform preserves that intersection at the far
+end, puts the finish on the ground-road exit beyond it, and builds a special
+new start from tile `0x30`. Since `0x30` has only three waypoint records, the
+opponent start index is changed from `0x43` (index 3) to `0x40` (index 0);
+the lane then follows waypoints 0→1→2 and links to tile `0x58`. The other
+stages retain their straight start tile, `0x43` index, and original branch
+scripts, so their rotated networks can take a different path. Leg 3 is also
+the only source leg where both opponents have the same script (`2→2→3→2`).
+These differences make the special intersection/start topology the strongest
+explanation for its distinct route, though the script and the topology have
+not been isolated experimentally.
+
+There is an important test-data caveat: the available playtested
+`TD3_SCENE03/SCENE03.DAT` differs from a fresh output of the current
+`invertPacificCourse()` by 27 bytes, including five bytes in leg 3. In the
+playtested file, the new start is tile `0x78` with waypoint `0x43`, and the
+finish tile `0x59` is at `(30,2)`. The current transform instead writes tile
+`0x30` with waypoint `0x40` at the start and places the finish at `(0,2)`.
+The playtest therefore confirms the route behavior of the earlier arrangement,
+not yet the exact current export. On the available test file both traced
+opponents reach the finish; on a fresh current export, both scripts end before
+the detected finish. Retest the current export before calling the new
+leg-3 arrangement verified. See `course-lane-connectivity.md` for the tile
+port catalog and per-leg map audit.
 
 ## Safe implementation sequence
 
