@@ -28,6 +28,7 @@ git submodule update --init --recursive
 - [Tile previews and gameplay-data investigation](sessions/2026-11-14_1847+0100.md): rotated tile thumbnails and findings about map-driven game logic.
 - [Entity overlay and AI route scripts](sessions/2026-11-14_1906+0100.md): map-entity inspection and Pacific opponent branch-script comparison.
 - [Tile vegetation, inversion, and repository layout](sessions/2026-11-14_1931+0100.md): tile-child sprites, reverse-course risks, and submodule prerequisites.
+- [Enhanced port: extended draw distance and random opponent cars](sessions/2026-11-17_2252+0100.md): whole-map far ring rendering, `--far-lod`, and per-course random rival selection in `repos/testdrive3-enhanced-analysis`.
 
 Add a timestamped Markdown file under `sessions/` for each walkthrough, and
 update the human-readable documents under `docs/` when findings are confirmed.
