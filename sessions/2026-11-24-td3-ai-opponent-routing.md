@@ -2,7 +2,7 @@
 
 ## Context
 
-Implemented an opt-in TD3-enhanced opponent AI route-generation feature that produces valid 10-byte branch scripts at leg load, while keeping the legacy script format for DOS/course-editor compatibility. Work landed in `testdrive3-enhanced-analysis` commit `69bad11`.
+Implemented an opt-in TD3-enhanced opponent AI route-generation feature that produces valid 10-byte branch scripts at leg load, while keeping the legacy script format for DOS/course-editor compatibility. Work landed in `testdrive3-enhanced-analysis` commit `5f32aa0`.
 
 ## Problem / Findings
 
